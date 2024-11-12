@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
 
-import time
-import math
-import hashlib
-import os
-import tempfile
-import argparse
+import time, math, hashlib, os, tempfile, argparse, gzip
 from multiprocessing import Pool, cpu_count
+from typing import Literal
+
+
+def timer(mode: Literal['Single Threaded', 'Multiprocessing'], func, *args, repeat=1, **kwargs):
+    '''Times Functions with Multiple Iterations'''
+    total_time = 0
+    for _ in range(repeat):
+        start_time = time.time()
+        func(*args, **kwargs)
+        total_time += time.time() - start_time
+    avg_time = total_time / repeat
+    print(f"{mode} Time (avg over {repeat} runs): {avg_time:.2f} seconds")
+
+
+def compression_operations(data_size_mb):
+    data = b"A" * (data_size_mb * 1024 * 1024)
+    compressed_data = gzip.compress(data)
+    decompressed_data = gzip.decompress(compressed_data)
+    return len(decompressed_data)
 
 # Integer arithmetic
 def integer_operations(n):
@@ -82,55 +96,41 @@ def main():
     parser.add_argument("--iterations", type=int, default=10**8, help="Number of iterations for integer and float tests (default: 100,000,000)")
     parser.add_argument("--encrypt_iterations", type=int, default=10**7, help="Number of iterations for encryption test (default: 10,000,000)")
     parser.add_argument("--file_size", type=int, default=1000, help="File size in MB for Disk I/O test (default: 1000 MB)")
+    parser.add_argument("--gzip_size", type=int, default=1000, help="File size in MB for Disk I/O test (default: 1000 MB)")
     parser.add_argument("--array_size", type=int, default=10**8, help="Array size for memory speed test (default: 100,000,000 elements)")
     parser.add_argument("--num_processes", type=int, default=cpu_count(), help=f"Number of processes to use (default: number of CPUs: {cpu_count()})")
+    parser.add_argument("--repeat", type=int, default=1, help="Number of times to repeat each benchmark (default: 1)")
     args = parser.parse_args()
 
     print(f"Starting benchmarks with {args.num_processes} processes...")
 
-    # Integer Operations
     print("\n[1] Integer Operations")
-    start_time = time.time()
-    integer_operations(args.iterations)
-    print(f"Single Threaded Time: {time.time() - start_time:.2f} seconds")
-
-    start_time = time.time()
-    run_multiprocessing(integer_operations, args.iterations, args.num_processes)
-    print(f"Multiprocessing Time: {time.time() - start_time:.2f} seconds")
+    timer('Single Threaded', integer_operations, args.iterations, repeat=args.repeat)
+    timer('Multiprocessing', run_multiprocessing, integer_operations, args.iterations, args.num_processes, repeat=args.repeat)
 
 
-
-    # Floating-Point Operations
     print("\n[2] Floating-Point Operations")
-    start_time = time.time()
-    floating_point_operations(args.iterations)
-    print(f"Single Threaded Time: {time.time() - start_time:.2f} seconds")
+    timer('Single Threaded', floating_point_operations, args.iterations, repeat=args.repeat)
+    timer('Multiprocessing', run_multiprocessing, floating_point_operations, args.iterations, args.num_processes, repeat=args.repeat)
 
-    start_time = time.time()
-    run_multiprocessing(floating_point_operations, args.iterations, args.num_processes)
-    print(f"Multiprocessing Time: {time.time() - start_time:.2f} seconds")
 
-    # Encryption Operations
     print("\n[3] Encryption (SHA-256) Operations")
-    start_time = time.time()
-    encryption_operations(args.encrypt_iterations)
-    print(f"Single Threaded Time: {time.time() - start_time:.2f} seconds")
+    timer('Single Threaded', encryption_operations, args.encrypt_iterations, repeat=args.repeat)
+    timer('Multiprocessing', run_multiprocessing, encryption_operations, args.encrypt_iterations, args.num_processes, repeat=args.repeat)
 
-    start_time = time.time()
-    run_multiprocessing(encryption_operations, args.encrypt_iterations, args.num_processes)
-    print(f"Multiprocessing Time: {time.time() - start_time:.2f} seconds")
+    print("\n[4] Compression Operations")
+    timer('Single Threaded', compression_operations, args.gzip_size, repeat=args.repeat)
+    timer('Multiprocessing', run_multiprocessing, compression_operations, args.gzip_size, args.num_processes, repeat=args.repeat)
 
     # Disk I/O Operations
-    print("\n[4] Disk I/O Operations")
+    print("\n[5] Disk I/O Operations")
     write_time, read_time = disk_io_operations(args.file_size)
     print(f"Write Time: {write_time:.2f} seconds")
     print(f"Read Time: {read_time:.2f} seconds")
 
     # Memory Speed Operations
-    print("\n[5] Memory Speed Operations")
-    start_time = time.time()
-    memory_speed_operations(args.array_size)
-    print(f"Time: {time.time() - start_time:.2f} seconds")
+    print("\n[6] Memory Speed Operations")
+    timer('Single Threaded', memory_speed_operations, args.array_size, repeat=args.repeat)
 
 if __name__ == "__main__":
     main()
