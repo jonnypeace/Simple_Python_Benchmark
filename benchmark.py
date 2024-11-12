@@ -65,9 +65,17 @@ def memory_speed_operations(array_size):
 
 # Multiprocessing wrapper
 def run_multiprocessing(task_function, total_iterations, num_processes):
+    # Calculate chunks
     chunk_size = total_iterations // num_processes
+    chunks = [chunk_size] * num_processes
+
+    # Add remainder to the last chunk
+    remainder = total_iterations % num_processes
+    if remainder > 0:
+        chunks.append(remainder)
+
     with Pool(processes=num_processes) as pool:
-        pool.map(task_function, [chunk_size] * num_processes)
+        pool.map(task_function, chunks)    
 
 def main():
     parser = argparse.ArgumentParser(description="Comprehensive Benchmark Script with Multiprocessing")
