@@ -71,10 +71,10 @@ def run_multiprocessing(task_function, total_iterations, num_processes):
 
 def main():
     parser = argparse.ArgumentParser(description="Comprehensive Benchmark Script with Multiprocessing")
-    parser.add_argument("--iterations", type=int, default=10**8, help="Number of iterations for integer and float tests (default: 1,000,000)")
-    parser.add_argument("--encrypt_iterations", type=int, default=10**7, help="Number of iterations for encryption test (default: 10,000)")
-    parser.add_argument("--file_size", type=int, default=1000, help="File size in MB for Disk I/O test (default: 10 MB)")
-    parser.add_argument("--array_size", type=int, default=10**8, help="Array size for memory speed test (default: 1,000,000 elements)")
+    parser.add_argument("--iterations", type=int, default=10**8, help="Number of iterations for integer and float tests (default: 100,000,000)")
+    parser.add_argument("--encrypt_iterations", type=int, default=10**7, help="Number of iterations for encryption test (default: 10,000,000)")
+    parser.add_argument("--file_size", type=int, default=1000, help="File size in MB for Disk I/O test (default: 1000 MB)")
+    parser.add_argument("--array_size", type=int, default=10**8, help="Array size for memory speed test (default: 100,000,000 elements)")
     parser.add_argument("--num_processes", type=int, default=cpu_count(), help=f"Number of processes to use (default: number of CPUs: {cpu_count()})")
     args = parser.parse_args()
 
