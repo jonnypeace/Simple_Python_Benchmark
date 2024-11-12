@@ -15,7 +15,42 @@ def timer(mode: Literal['Single Threaded', 'Multiprocessing'], func, *args, repe
     avg_time = total_time / repeat
     print(f"{mode} Time (avg over {repeat} runs): {avg_time:.2f} seconds")
 
+#### Currently Note in Use ####
 
+# Sorting Operations
+def sorting_operations(size):
+    """
+    Tests sorting performance by generating a random list of integers and sorting it.
+    """
+    import random
+    data = [random.randint(0, size) for _ in range(size)]
+    sorted_data = sorted(data)
+    return sorted_data
+
+# Random Number Generation Operations
+def random_generation_operations(size):
+    """
+    Tests random number generation performance by generating a list of random floats.
+    """
+    import random
+    data = [random.random() for _ in range(size)]
+    return sum(data)
+
+# JSON Serialization/Deserialization Operations
+def json_operations(size):
+    """
+    Tests JSON serialization and deserialization performance by creating, serializing, 
+    and deserializing a list of dictionaries.
+    """
+    import json
+    data = [{"id": i, "value": f"data_{i}"} for i in range(size)]
+    json_data = json.dumps(data)
+    deserialized_data = json.loads(json_data)
+    return len(deserialized_data)
+
+###################################
+
+# GZIP Compress/Decompress Operations
 def compression_operations(data_size_mb):
     data = b"A" * (data_size_mb * 1024 * 1024)
     compressed_data = gzip.compress(data)
