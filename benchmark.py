@@ -50,6 +50,25 @@ def json_operations(size):
 
 ###################################
 
+def matrix_operations(size, iterations):
+    """
+    Tests the performance of repeated matrix multiplications.
+    
+    Parameters:
+    - size: The dimension of the square matrices (e.g., size=1000 for 1000x1000 matrices).
+    - iterations: The number of times to repeat the matrix multiplication.
+    """
+    import numpy as np
+    # Generate two random square matrices
+    a = np.random.rand(size, size)
+    b = np.random.rand(size, size)
+    
+    # Perform matrix multiplication multiple times
+    for _ in range(iterations):
+        c = np.dot(a, b)
+    return c
+
+
 # GZIP Compress/Decompress Operations
 def compression_operations(data_size_mb):
     data = b"A" * (data_size_mb * 1024 * 1024)
@@ -134,8 +153,20 @@ def main():
     parser.add_argument("--gzip_size", type=int, default=1000, help="File size in MB for Disk I/O test (default: 1000 MB)")
     parser.add_argument("--array_size", type=int, default=10**8, help="Array size for memory speed test (default: 100,000,000 elements)")
     parser.add_argument("--num_processes", type=int, default=cpu_count(), help=f"Number of processes to use (default: number of CPUs: {cpu_count()})")
+    parser.add_argument("--numpy_matrix_size", type=int, default=1000, help=f"Size of matrix for np.dot (default: 1000)")
+    parser.add_argument("--numpy_matrix_iterations", type=int, default=10**3, help=f"Number of Matrix Maths iterations using numpy. (default: 1,000)")
     parser.add_argument("--repeat", type=int, default=1, help="Number of times to repeat each benchmark (default: 1)")
+    parser.add_argument("--enable_numpy", type=bool, default=False, help="Ensure numpy is used in environment")
+
     args = parser.parse_args()
+
+    if args.enable_numpy:
+        try:
+            import numpy as np
+        except ModuleNotFoundError:
+            print('Error: Numpy not found. Check environment')
+            exit(1)
+
 
     print(f"Starting benchmarks with {args.num_processes} processes...")
 
@@ -167,5 +198,13 @@ def main():
     print("\n[6] Memory Speed Operations")
     timer('Single Threaded', memory_speed_operations, args.array_size, repeat=args.repeat)
 
+    # Numpy Operations
+    if args.enable_numpy:
+        print("\n[7] Numpy Matrix Maths Operations")
+        timer('Single Threaded', matrix_operations, args.numpy_matrix_size, args.numpy_matrix_iterations, repeat=args.repeat)
+        
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('\n\nExiting....\n')
